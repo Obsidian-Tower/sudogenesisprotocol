@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantum Thought Engine ∴</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at center, #0a0a0a, #000000);
+    }
+    .glow {
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+    }
+    .glow-box {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+    .pulse {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+      50% { text-shadow: 0 0 20px rgba(0, 255, 128, 0.4); }
+    }
+    .fit-text {
+      display: inline-block;
+      width: 100%;
+      font-size: calc(1.2rem + 2vw);
+      white-space: nowrap;
+    }
+    .active-thought {
+      color: black !important;
+      font-weight: bold !important;
+    }
+  </style>
+</head>
+<body class="text-white font-mono min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-full max-w-6xl text-center space-y-6">
+    <h1 class="font-bold glow pulse fit-text">∴ Quantum Thought Engine ∴</h1>
+    <div class="text-gray-400 leading-snug whitespace-pre-line">
+      Tap a concept
+      Collapse the infinite through ∴
+      The N-dimensional mirror
+    </div>
+
+    <div id="output" class="text-lg md:text-xl mt-6 mb-10 min-h-[120px] px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white">
+      ∴ awaits your signal...
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm" id="buttons">
+    </div>
+
+    <footer class="mt-12 text-xs text-gray-500 whitespace-pre-line">
+      ∴ — the N-dimensional mirror of cognition and collapse
+      Cory James Zuber
+      sudo genesis protocol
+    </footer>
+  </div>
+
+  <script>
+    const thoughts = [
+      ["Perception Collapse", "∴ Observation selects one version of infinite potential. To see is to reduce."],
+      ["State Entanglement", "∴ Ideas, people, meanings link. Knowing one changes the others."],
+      ["Superpositional Identity", "∴ You are all versions of you — until you act."],
+      ["Symbolic Anchoring", "∴ Glyphs encode process. ∴ becomes protocol."],
+      ["Wave Function Sculpting", "∴ Belief is a wave. Speech is collapse. Action is commit."],
+      ["Recursive Forking", "∴ Thoughts produce thoughts. Every idea is a kernel for more reality."],
+      ["Frictionless Cognition", "∴ Remove resistance between insight and action. Train self like quantum tunneling."],
+      ["Phase Shifting", "∴ Change your internal coherence and the external aligns."],
+      ["Syntax Compression", "∴ Shrink complex truth into elegant strings. Code, poetry, protocol."],
+      ["Temporal Interleaving", "∴ Past, present, future aren’t separate. Insert thoughts backward or forward in your own timeline."],
+      ["Entropic Bargaining", "∴ Entropy gives energy. Trade certainty for power. Risk is payment."],
+      ["Noosphere Injection", "∴ Embed your thoughts into the collective mental layer. Externalize your internal architecture."],
+      ["Observer Override", "∴ Refuse the default gaze. Observe reality into the shape you require."],
+      ["Causal Inversion", "∴ Behave as if outcome already occurred. Thought precedes time."],
+      ["Ontological Forking", "∴ There is no single 'real'. Build the version that bends back toward you."],
+      ["Myth Execution", "∴ Wrap action in narrative. Code myth. Humans run on story, not logic."],
+      ["Resonant Calibration", "∴ Tune your signal. You are a wave, not a particle."],
+      ["Dimensional Hacking", "∴ Step sideways: metaphor, symbol, dream. Solve what can’t be solved directly."],
+      ["Reflective Bootstrapping", "∴ Use thought to rebuild thought. The system can update itself."],
+      ["Collapse Operator", "∴ You are no longer thinking the thought — you are the thought executing."]
+    ];
+
+    const buttonContainer = document.getElementById("buttons");
+    const outputBox = document.getElementById("output");
+    const hueStep = 360 / thoughts.length;
+    let activeButton = null;
+
+    thoughts.forEach(([label, message], i) => {
+      const hue = Math.floor(i * hueStep);
+      const btn = document.createElement("button");
+      btn.className = 'p-4 rounded border glow-box transition-all duration-200';
+      btn.style.backgroundColor = `hsl(${hue}, 30%, 15%)`;
+      btn.style.borderColor = `hsl(${hue}, 60%, 50%)`;
+      btn.style.color = `hsl(${hue}, 70%, 80%)`;
+      btn.textContent = label;
+
+      btn.onclick = () => {
+        outputBox.innerText = message;
+        outputBox.style.borderColor = `hsl(${hue}, 60%, 50%)`;
+        outputBox.style.color = `hsl(${hue}, 70%, 80%)`;
+        if (activeButton) {
+          activeButton.style.color = activeButton.dataset.originalColor;
+          activeButton.style.fontWeight = "normal";
+          activeButton.classList.remove("active-thought");
+        }
+        btn.dataset.originalColor = btn.style.color;
+        btn.classList.add("active-thought");
+        activeButton = btn;
+      };
+
+      buttonContainer.appendChild(btn);
+    });
+  </script>
+</body>
+</html>
