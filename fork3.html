@@ -4,104 +4,85 @@
   <meta charset="UTF-8" />
   <title>Fractal Protocol</title>
   <style>
+    /* Ensure all elements respect declared widths/padding exactly */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 1.5rem; /* Slightly smaller base padding */
+      padding: 0.5rem; /* minimal spacing for all devices */
       font-family: "Courier New", monospace;
       background-color: #0a0a0a;
       color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      line-height: 1.5;
     }
 
     h1 {
-      margin-bottom: 1rem;
-      font-size: 2.5rem;
-      color: #e0e0e0;
+      margin: 0.5rem 0 0.8rem 0;
+      font-size: 2rem; /* smaller default for better mobile fit */
       text-align: center;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
     }
 
     .symbol {
-      font-size: 2rem;
-      color: #e0e0e0;
-      margin: 0.3rem 0 1rem 0;
+      font-size: 1.5rem;
       text-align: center;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      margin: 0.3rem 0 1rem;
     }
 
     .section {
-      max-width: 700px;
-      margin-bottom: 1.5rem; /* slightly smaller vertical spacing */
-      padding-left: 1rem;
+      margin-bottom: 1rem;
+      padding-left: 0.5rem; /* lightweight left padding */
       border-left: 2px solid #333;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      width: 100%; /* ensure sections shrink on mobile */
     }
 
     .section h2 {
-      font-size: 1.4rem;
-      margin-bottom: 0.6rem;
-      color: #e0e0e0;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      margin: 0.4rem 0 0.3rem 0;
+      font-size: 1.2rem;
     }
 
     .section p {
-      margin: 0.4rem 0;
-      line-height: 1.6;
-      white-space: normal;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      margin: 0.2rem 0;
     }
 
     .final-note {
-      max-width: 700px;
-      width: 100%;
-      margin-top: 2rem; /* slightly smaller top margin */
-      padding-left: 1rem;
+      margin-top: 1rem;
+      padding-left: 0.5rem;
       border-left: 2px dashed #444;
       font-style: italic;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
     }
 
+    /* Let’s reduce spacing even more on smaller screens. */
     @media (max-width: 600px) {
       body {
-        padding: 1rem; /* reduce body padding on mobile */
+        padding: 0.3rem; /* extremely tight for small devices */
       }
       h1 {
-        font-size: 1.8rem; /* smaller heading for mobile */
-        margin-bottom: 0.8rem;
+        font-size: 1.6rem;
+        margin: 0.4rem 0 0.6rem 0;
       }
       .symbol {
-        font-size: 1.6rem;
-        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        margin: 0.2rem 0 0.6rem;
       }
       .section {
-        margin-bottom: 1rem; /* reduce spacing on mobile */
-        padding-left: 0.5rem;
+        margin-bottom: 0.8rem;
+        padding-left: 0.3rem;
       }
       .section h2 {
-        font-size: 1.2rem;
-        margin-bottom: 0.4rem;
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
       }
       .section p {
-        font-size: 0.95rem; /* slightly smaller text */
-        margin: 0.3rem 0;
-        line-height: 1.4;
+        font-size: 0.9rem;
+        margin: 0.15rem 0;
       }
       .final-note {
-        margin-top: 1.5rem; 
-        padding-left: 0.5rem;
+        margin-top: 0.8rem;
+        padding-left: 0.3rem;
       }
       .final-note p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
     }
   </style>
