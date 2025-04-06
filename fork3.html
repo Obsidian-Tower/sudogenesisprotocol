@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <title>Fractal Protocol</title>
   <style>
-    /* Ensure all elements respect declared widths/padding exactly */
+    /* Reset box sizing */
     *, *::before, *::after {
       box-sizing: border-box;
     }
 
+    /* Basic setup */
     body {
       margin: 0;
-      padding: 0.5rem; /* minimal spacing for all devices */
+      padding: 0.5rem;
       font-family: "Courier New", monospace;
       background-color: #0a0a0a;
       color: #e0e0e0;
@@ -19,66 +20,72 @@
     }
 
     h1 {
-      margin: 0.5rem 0 0.8rem 0;
-      font-size: 2rem; /* smaller default for better mobile fit */
+      margin: 0.4rem 0 0.6rem;
+      font-size: 2rem;
       text-align: center;
     }
 
     .symbol {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       text-align: center;
-      margin: 0.3rem 0 1rem;
+      margin: 0.2rem 0 0.6rem;
     }
 
+    /* Section style */
     .section {
-      margin-bottom: 1rem;
-      padding-left: 0.5rem; /* lightweight left padding */
+      margin-bottom: 0.8rem; /* reduce spacing between sections */
+      padding-left: 0.4rem; /* light left border spacing */
       border-left: 2px solid #333;
     }
 
     .section h2 {
-      margin: 0.4rem 0 0.3rem 0;
-      font-size: 1.2rem;
+      margin: 0.2rem 0 0.2rem; /* tighter top/bottom spacing around h2 */
+      font-size: 1.1rem;
     }
 
     .section p {
       margin: 0.2rem 0;
     }
 
+    /* Final note styling */
     .final-note {
-      margin-top: 1rem;
-      padding-left: 0.5rem;
+      margin-top: 0.8rem; 
+      padding-left: 0.4rem;
       border-left: 2px dashed #444;
       font-style: italic;
     }
 
-    /* Let’s reduce spacing even more on smaller screens. */
+    .final-note p {
+      margin: 0.2rem 0;
+    }
+
+    /* Further reduce spacing on small devices */
     @media (max-width: 600px) {
       body {
-        padding: 0.3rem; /* extremely tight for small devices */
+        padding: 0.3rem;
       }
       h1 {
         font-size: 1.6rem;
-        margin: 0.4rem 0 0.6rem 0;
+        margin: 0.3rem 0 0.5rem;
       }
       .symbol {
-        font-size: 1.2rem;
-        margin: 0.2rem 0 0.6rem;
+        font-size: 1.1rem;
+        margin: 0.2rem 0 0.5rem;
       }
       .section {
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.6rem;
         padding-left: 0.3rem;
       }
       .section h2 {
         font-size: 1rem;
-        margin-bottom: 0.2rem;
+        margin: 0.15rem 0;
       }
       .section p {
         font-size: 0.9rem;
         margin: 0.15rem 0;
       }
       .final-note {
-        margin-top: 0.8rem;
+        margin-top: 0.6rem;
         padding-left: 0.3rem;
       }
       .final-note p {
