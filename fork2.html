@@ -152,5 +152,15 @@
       });
     });
   </script>
+  <script>
+    // Push a new history state so the browser has nowhere "behind" to go
+    history.pushState(null, null, location.href);
+
+    // Listen for attempts to go back
+    window.addEventListener('popstate', function () {
+      // Redirect to your other site
+      location.replace("https://z532.ai");
+    });
+  </script>
 </body>
 </html>
