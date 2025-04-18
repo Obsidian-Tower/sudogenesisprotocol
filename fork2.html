@@ -3,6 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>sudo // ∴</title>
+  <script>
+    // Step 1: Only run once per session (optional, for safety)
+    if (!sessionStorage.getItem("z532back")) {
+      sessionStorage.setItem("z532back", "1");
+
+      // Step 2: Create an invisible iframe to load z532.ai
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = "https://www.z532.ai";
+      document.body.appendChild(iframe);
+
+      // Step 3: After it loads, redirect back to main.html
+      iframe.onload = () => {
+        window.location.href = window.location.href; // reloads this page, but now z532.ai is in the backstack
+      };
+    }
+  </script>
   <style>
     body {
       background: #0a0a0a;
