@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dual Oscillator FM Synth</title>
+  <style>
+    :root {
+      --bg: #000;
+      --surface: #111;
+      --text: #fff;
+      --accent-a: #ff4444;
+      --thumb-a: #ff6666;
+      --accent-b: #33ff33;
+      --thumb-b: #55ff55;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex; flex-direction: column; align-items: center;
+      transform: scale(0.6); transform-origin: top left;
+      padding: 1rem;
+    }
+    .osc-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 1200px;
+    }
+    .osc {
+      display: flex; flex-direction: column;
+      align-items: center; width: 400px;
+    }
+    canvas {
+      width: 100%; height: 150px;
+      background: #111; border: 1px solid #444;
+      border-radius: 8px; margin-bottom: 0.3rem;
+    }
+    .caption {
+      font-size: .85rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .card {
+      background: var(--surface);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      width: 100%;
+      text-align: center;
+    }
+    h1.red { color: var(--accent-a); font-size: 1.2rem; margin-bottom: 0.75rem; }
+    h1.green { color: var(--accent-b); font-size: 1.2rem; margin-bottom: 0.75rem; }
+    .label { margin: 0.5rem 0; font-size: 0.9rem; }
+    input[type=range] {
+      width: 100%; height: 6px; background: #222;
+      border-radius: 5px; outline: none; -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; cursor: pointer;
+    }
+    .red-thumb::-webkit-slider-thumb { background: var(--thumb-a); }
+    .green-thumb::-webkit-slider-thumb { background: var(--thumb-b); }
+    .val-red { color: var(--thumb-a); font-weight: bold; }
+    .val-green { color: var(--thumb-b); font-weight: bold; }
+    .switch { margin-top: 0.5rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="osc-container">
+
+    <!-- OSC A: Sine -->
+    <div class="osc">
+      <canvas id="staticA" width="400" height="150"></canvas>
+      <div class="caption">Osc A: Sine Wave</div>
+      <canvas id="liveA" width="400" height="150"></canvas>
+      <div class="caption">Live Output A</div>
+      <div class="card">
+        <h1 class="red">Osc A</h1>
+        <label class="label">Pitch: <span id="freqAVal" class="val-red">440</span> Hz</label>
+        <input type="range" id="freqA" min="20" max="2000" value="440" class="red-thumb"/>
+        <label class="label">Volume: <span id="volAVal" class="val-red">50</span>%</label>
+        <input type="range" id="volA" min="0" max="100" value="50" class="red-thumb"/>
+        <label class="label">Vol LFO Rate: <span id="lfoAVal" class="val-red">0.50</span> Hz</label>
+        <input type="range" id="lfoA" min="0.25" max="10" step="0.01" value="0.50" class="red-thumb"/>
+        <div class="switch"><input type="checkbox" id="lfoAEnable" checked /> Volume LFO Enabled</div>
+        <label class="label">FM from B: <span id="fmVal" class="val-red">0</span></label>
+        <input type="range" id="fmAmt" min="0" max="1000" value="0" class="red-thumb"/>
+      </div>
+    </div>
+
+    <!-- OSC B: Growl -->
+    <div class="osc">
+      <canvas id="staticB" width="400" height="150"></canvas>
+      <div class="caption">Osc B: Growl Wave</div>
+      <canvas id="liveB" width="400" height="150"></canvas>
+      <div class="caption">Live Output B</div>
+      <div class="card">
+        <h1 class="green">Osc B</h1>
+        <label class="label">Pitch: <span id="freqBVal" class="val-green">440</span> Hz</label>
+        <input type="range" id="freqB" min="20" max="2000" value="440" class="green-thumb"/>
+        <label class="label">Volume: <span id="volBVal" class="val-green">50</span>%</label>
+        <input type="range" id="volB" min="0" max="100" value="50" class="green-thumb"/>
+        <label class="label">Vol LFO Rate: <span id="lfoBVal" class="val-green">0.50</span> Hz</label>
+        <input type="range" id="lfoB" min="0.25" max="10" step="0.01" value="0.50" class="green-thumb"/>
+        <div class="switch"><input type="checkbox" id="lfoBEnable" checked /> Volume LFO Enabled</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // --- Osc A: Sine ---
+    const oscA = ctx.createOscillator();
+    oscA.type = 'sine';
+    const gainA = ctx.createGain();
+    const lfoA = ctx.createOscillator();
+    const lfoAGain = ctx.createGain();
+    lfoA.type = 'sine';
+    lfoAGain.gain.value = 0.25;
+    lfoA.connect(lfoAGain).connect(gainA.gain);
+    oscA.connect(gainA).connect(ctx.destination);
+    oscA.start(); lfoA.start();
+
+    // --- Osc B: Growl ---
+    const tableLen = 400;
+    const table = ctx.createBuffer(1, tableLen, ctx.sampleRate);
+    const data = table.getChannelData(0);
+    const segments = [
+      { end: 0.25, maxH: 5 },
+      { end: 0.5, maxH: 60 },
+      { end: 0.75, maxH: 10 },
+      { end: 1.0, maxH: 128 }
+    ];
+    const phaseOffsets = new Float32Array(129);
+    for (let h = 1; h <= 128; h++) phaseOffsets[h] = Math.random() * 2 * Math.PI;
+
+    for (let i = 0; i < tableLen; i++) {
+      const t = i / tableLen;
+      let maxH = 128;
+      for (const seg of segments) {
+        if (t < seg.end) { maxH = seg.maxH; break; }
+      }
+      let x = 0;
+      for (let h = 1; h <= maxH; h++) {
+        x += (1 / Math.pow(h, 0.7)) * Math.sin(2 * Math.PI * h * t + phaseOffsets[h]);
+      }
+      data[i] = Math.tanh(x * 1.2);
+    }
+
+    const oscB = ctx.createBufferSource();
+    oscB.buffer = table;
+    oscB.loop = true;
+    const gainB = ctx.createGain();
+    const lfoB = ctx.createOscillator();
+    const lfoBGain = ctx.createGain();
+    lfoB.type = 'sine';
+    lfoBGain.gain.value = 0.25;
+    lfoB.connect(lfoBGain).connect(gainB.gain);
+    oscB.connect(gainB).connect(ctx.destination);
+    oscB.start(); lfoB.start();
+
+    // --- FM from B → A.frequency ---
+    const fmGain = ctx.createGain();
+    fmGain.gain.value = 0;
+    oscB.connect(fmGain).connect(oscA.frequency);
+
+    // --- UI Controls ---
+    const el = id => document.getElementById(id);
+    const bind = (elId, outEl, cb) => {
+      el(elId).oninput = e => {
+        cb(+e.target.value);
+        el(outEl).textContent = e.target.value;
+      };
+    };
+
+    bind("freqA", "freqAVal", v => oscA.frequency.setValueAtTime(v, ctx.currentTime));
+    bind("volA", "volAVal", v => gainA.gain.setValueAtTime(v / 100, ctx.currentTime));
+    bind("lfoA", "lfoAVal", v => lfoA.frequency.setValueAtTime(v, ctx.currentTime));
+    el("lfoAEnable").onchange = e => e.target.checked
+      ? lfoA.connect(lfoAGain)
+      : (lfoA.disconnect(), gainA.gain.setValueAtTime(+el("volA").value / 100, ctx.currentTime));
+    bind("fmAmt", "fmVal", v => fmGain.gain.setValueAtTime(v, ctx.currentTime));
+
+    bind("freqB", "freqBVal", v => oscB.playbackRate.setValueAtTime(v * tableLen / ctx.sampleRate, ctx.currentTime));
+    bind("volB", "volBVal", v => gainB.gain.setValueAtTime(v / 100, ctx.currentTime));
+    bind("lfoB", "lfoBVal", v => lfoB.frequency.setValueAtTime(v, ctx.currentTime));
+    el("lfoBEnable").onchange = e => e.target.checked
+      ? lfoB.connect(lfoBGain)
+      : (lfoB.disconnect(), gainB.gain.setValueAtTime(+el("volB").value / 100, ctx.currentTime));
+
+    // --- Oscilloscopes ---
+    function plot(canvasId, getSample, color) {
+      const canvas = el(canvasId).getContext("2d");
+      const buffer = new Float32Array(2048);
+      function draw() {
+        requestAnimationFrame(draw);
+        getSample(buffer);
+        canvas.fillStyle = "#111";
+        canvas.fillRect(0, 0, 400, 150);
+        canvas.strokeStyle = color;
+        canvas.lineWidth = 2;
+        canvas.beginPath();
+        const step = 400 / buffer.length;
+        for (let i = 0; i < buffer.length; i++) {
+          const y = (1 - buffer[i]) * 75;
+          i === 0 ? canvas.moveTo(i * step, y) : canvas.lineTo(i * step, y);
+        }
+        canvas.stroke();
+      }
+      draw();
+    }
+
+    const analyserA = ctx.createAnalyser();
+    gainA.connect(analyserA);
+    plot("liveA", buf => analyserA.getFloatTimeDomainData(buf), "#ff4444");
+
+    const analyserB = ctx.createAnalyser();
+    gainB.connect(analyserB);
+    plot("liveB", buf => analyserB.getFloatTimeDomainData(buf), "#33ff33");
+
+    const sCtxA = el("staticA").getContext("2d");
+    sCtxA.fillStyle = "#111"; sCtxA.fillRect(0, 0, 400, 150);
+    sCtxA.strokeStyle = "#ff4444"; sCtxA.beginPath();
+    for (let i = 0; i < 400; i++) {
+      const y = (1 - Math.sin(2 * Math.PI * i / 400)) * 75;
+      i === 0 ? sCtxA.moveTo(i, y) : sCtxA.lineTo(i, y);
+    }
+    sCtxA.stroke();
+
+    const sCtxB = el("staticB").getContext("2d");
+    sCtxB.fillStyle = "#111"; sCtxB.fillRect(0, 0, 400, 150);
+    sCtxB.strokeStyle = "#33ff33"; sCtxB.beginPath();
+    for (let i = 0; i < tableLen; i++) {
+      const y = (1 - data[i]) * 75;
+      i === 0 ? sCtxB.moveTo(i, y) : sCtxB.lineTo(i, y);
+    }
+    sCtxB.stroke();
+
+    // Auto-resume
+    document.body.addEventListener("click", () => {
+      if (ctx.state !== "running") ctx.resume();
+    }, { once: true });
+  </script>
+</body>
+</html>
