@@ -16,29 +16,43 @@
       --accent-f: #3399ff;
       --thumb-f: #55bbff;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      background: var(--bg); color: var(--text);
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Segoe UI', sans-serif;
-      display: flex; flex-direction: column; align-items: center;
-      transform: scale(0.6); transform-origin: top left;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 1rem;
+      overflow-x: hidden;
     }
     .osc-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 1.5rem;
+      width: 100%;
       max-width: 1200px;
     }
     .osc {
-      display: flex; flex-direction: column;
-      align-items: center; width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
     }
     canvas {
-      width: 100%; height: 150px;
-      background: #111; border: 1px solid #444;
-      border-radius: 8px; margin-bottom: 0.3rem;
+      width: 100%;
+      height: 150px;
+      background: #111;
+      border: 1px solid #444;
+      border-radius: 8px;
+      margin-bottom: 0.3rem;
     }
     .caption {
       font-size: .85rem;
@@ -52,19 +66,33 @@
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.7);
       width: 100%;
+      max-width: 400px;
       text-align: center;
     }
     h1.red { color: var(--accent-a); font-size: 1.2rem; margin-bottom: 0.75rem; }
     h1.green { color: var(--accent-b); font-size: 1.2rem; margin-bottom: 0.75rem; }
     h1.blue { color: var(--accent-f); font-size: 1.2rem; margin-bottom: 0.75rem; }
-    .label { margin: 0.5rem 0; font-size: 0.9rem; }
+    .label {
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+    }
     input[type=range] {
-      width: 100%; height: 6px; background: #222;
-      border-radius: 5px; outline: none; -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #222;
+      border-radius: 5px;
+      outline: none;
+      -webkit-appearance: none;
+      touch-action: manipulation;
     }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px;
-      border-radius: 50%; cursor: pointer;
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
     }
     .red-thumb::-webkit-slider-thumb { background: var(--thumb-a); }
     .green-thumb::-webkit-slider-thumb { background: var(--thumb-b); }
@@ -72,7 +100,40 @@
     .val-red { color: var(--thumb-a); font-weight: bold; }
     .val-green { color: var(--thumb-b); font-weight: bold; }
     .val-blue { color: var(--thumb-f); font-weight: bold; }
-    .switch { margin-top: 0.5rem; font-size: 0.85rem; }
+    .switch {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .osc-container {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        padding: 0 1rem;
+      }
+      .osc {
+        width: 100%;
+        max-width: 100%;
+      }
+      .card {
+        padding: 0.75rem 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+      }
+      h1.red, h1.green, h1.blue {
+        font-size: 1rem;
+      }
+      .label {
+        font-size: 0.8rem;
+      }
+      input[type=range] {
+        height: 5px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -135,7 +196,7 @@
   <script>
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // OSC A
+    // --- Osc A: Sine ---
     const oscA = ctx.createOscillator();
     oscA.type = 'sine';
     const gainA = ctx.createGain();
@@ -144,11 +205,12 @@
     const lfoA = ctx.createOscillator();
     const lfoAGain = ctx.createGain();
     lfoA.type = 'sine';
+    lfoAGain.gain.value = 0.25;
     lfoA.connect(lfoAGain).connect(gainA.gain);
     oscA.connect(gainA);
     oscA.start(); lfoA.start();
 
-    // OSC B
+    // --- Osc B: Growl ---
     const tableLen = 400;
     const table = ctx.createBuffer(1, tableLen, ctx.sampleRate);
     const data = table.getChannelData(0);
@@ -173,24 +235,20 @@
       data[i] = Math.tanh(x * 1.2);
     }
     const oscB = ctx.createBufferSource();
-    oscB.buffer = table;
-    oscB.loop = true;
-    const gainB = ctx.createGain();
-    const gainBBase = ctx.createGain();
+    oscB.buffer = table; oscB.loop = true;
+    const gainB = ctx.createGain(); const gainBBase = ctx.createGain();
     gainB.connect(gainBBase);
-    const lfoB = ctx.createOscillator();
-    const lfoBGain = ctx.createGain();
-    lfoB.type = 'sine';
+    const lfoB = ctx.createOscillator(); const lfoBGain = ctx.createGain();
+    lfoB.type = 'sine'; lfoBGain.gain.value = 0.25;
     lfoB.connect(lfoBGain).connect(gainB.gain);
     oscB.connect(gainB);
     oscB.start(); lfoB.start();
 
-    // FM
-    const fmGain = ctx.createGain();
-    fmGain.gain.value = 0;
+    // --- FM from B → A.frequency ---
+    const fmGain = ctx.createGain(); fmGain.gain.value = 0;
     oscB.connect(fmGain).connect(oscA.frequency);
 
-    // === FILTER ===
+    // --- FILTER ---
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = 1000;
@@ -205,107 +263,99 @@
     gainBBase.connect(filter);
     filter.connect(ctx.destination);
 
+    // --- UI Controls ---
     const el = id => document.getElementById(id);
-    const bind = (elId, outEl, cb) => {
-      el(elId).oninput = e => {
+    const bind = (id, out, cb) => {
+      el(id).oninput = e => {
         cb(+e.target.value);
-        el(outEl).textContent = e.target.value;
+        el(out).textContent = e.target.value;
       };
     };
 
-    bind("freqA", "freqAVal", v => oscA.frequency.setValueAtTime(v, ctx.currentTime));
-    bind("volA", "volAVal", v => {
-      const gain = v / 100;
-      gainABase.gain.setValueAtTime(gain, ctx.currentTime);
-      lfoAGain.gain.setValueAtTime(gain / 2, ctx.currentTime);
-      gainA.gain.setValueAtTime(gain / 2, ctx.currentTime);
+    bind("freqA","freqAVal", v=>oscA.frequency.setValueAtTime(v,ctx.currentTime));
+    bind("volA","volAVal", v=>{
+      const g=v/100;
+      gainABase.gain.setValueAtTime(g,ctx.currentTime);
+      lfoAGain.gain.setValueAtTime(g/2,ctx.currentTime);
+      gainA.gain.setValueAtTime(g/2,ctx.currentTime);
     });
-    bind("lfoA", "lfoAVal", v => lfoA.frequency.setValueAtTime(v, ctx.currentTime));
-    el("lfoAEnable").onchange = e => e.target.checked
+    bind("lfoA","lfoAVal", v=>lfoA.frequency.setValueAtTime(v,ctx.currentTime));
+    el("lfoAEnable").onchange = e=>e.target.checked
       ? lfoA.connect(lfoAGain)
-      : (lfoA.disconnect(), gainA.gain.setValueAtTime(+el("volA").value / 100, ctx.currentTime));
-    bind("fmAmt", "fmVal", v => fmGain.gain.setValueAtTime(v, ctx.currentTime));
+      : (lfoA.disconnect(), gainA.gain.setValueAtTime(+el("volA").value/100,ctx.currentTime));
 
-    bind("freqB", "freqBVal", v => oscB.playbackRate.setValueAtTime(v * tableLen / ctx.sampleRate, ctx.currentTime));
-    bind("volB", "volBVal", v => {
-      const gain = v / 100;
-      gainBBase.gain.setValueAtTime(gain, ctx.currentTime);
-      lfoBGain.gain.setValueAtTime(gain / 2, ctx.currentTime);
-      gainB.gain.setValueAtTime(gain / 2, ctx.currentTime);
+    bind("fmAmt","fmVal", v=>fmGain.gain.setValueAtTime(v,ctx.currentTime));
+
+    bind("freqB","freqBVal", v=>oscB.playbackRate.setValueAtTime(v*tableLen/ctx.sampleRate,ctx.currentTime));
+    bind("volB","volBVal", v=>{
+      const g=v/100;
+      gainBBase.gain.setValueAtTime(g,ctx.currentTime);
+      lfoBGain.gain.setValueAtTime(g/2,ctx.currentTime);
+      gainB.gain.setValueAtTime(g/2,ctx.currentTime);
     });
-    bind("lfoB", "lfoBVal", v => lfoB.frequency.setValueAtTime(v, ctx.currentTime));
-    el("lfoBEnable").onchange = e => e.target.checked
+    bind("lfoB","lfoBVal", v=>lfoB.frequency.setValueAtTime(v,ctx.currentTime));
+    el("lfoBEnable").onchange = e=>e.target.checked
       ? lfoB.connect(lfoBGain)
-      : (lfoB.disconnect(), gainB.gain.setValueAtTime(+el("volB").value / 100, ctx.currentTime));
+      : (lfoB.disconnect(), gainB.gain.setValueAtTime(+el("volB").value/100,ctx.currentTime));
 
-    bind("cutoff", "cutoffVal", v => {
-      filter.frequency.setValueAtTime(v, ctx.currentTime);
-      filterLFOGain.gain.setValueAtTime(v / 2, ctx.currentTime);
+    bind("cutoff","cutoffVal", v=>{
+      filter.frequency.setValueAtTime(v,ctx.currentTime);
+      filterLFOGain.gain.setValueAtTime(v/2,ctx.currentTime);
     });
-    bind("lfoF", "lfoFVal", v => filterLFO.frequency.setValueAtTime(v, ctx.currentTime));
-    el("lfoFEnable").onchange = e => e.target.checked
+    bind("lfoF","lfoFVal", v=>filterLFO.frequency.setValueAtTime(v,ctx.currentTime));
+    el("lfoFEnable").onchange = e=>e.target.checked
       ? filterLFO.connect(filterLFOGain)
-      : (filterLFO.disconnect(), filter.frequency.setValueAtTime(+el("cutoff").value, ctx.currentTime));
+      : (filterLFO.disconnect(), filter.frequency.setValueAtTime(+el("cutoff").value,ctx.currentTime));
 
     el("volA").dispatchEvent(new Event("input"));
     el("volB").dispatchEvent(new Event("input"));
     el("cutoff").dispatchEvent(new Event("input"));
 
-    // === PLOT FUNCTION REMAINS UNCHANGED ===
-    function plot(canvasId, getSample, color) {
-      const canvas = el(canvasId).getContext("2d");
-      const buffer = new Float32Array(2048);
-      function draw() {
+    // --- Plot Function ---
+    function plot(id, get, color) {
+      const c = el(id).getContext("2d");
+      const buf = new Float32Array(2048);
+      (function draw(){
         requestAnimationFrame(draw);
-        getSample(buffer);
-        canvas.fillStyle = "#111";
-        canvas.fillRect(0, 0, 400, 150);
-        canvas.strokeStyle = color;
-        canvas.lineWidth = 2;
-        canvas.beginPath();
-        const step = 400 / buffer.length;
-        for (let i = 0; i < buffer.length; i++) {
-          const y = (1 - buffer[i]) * 75;
-          i === 0 ? canvas.moveTo(i * step, y) : canvas.lineTo(i * step, y);
+        get(buf);
+        c.fillStyle="#111"; c.fillRect(0,0,400,150);
+        c.strokeStyle=color; c.lineWidth=2; c.beginPath();
+        const step=400/buf.length;
+        for(let i=0;i<buf.length;i++){
+          const y=(1-buf[i])*75;
+          i===0?c.moveTo(i*step,y):c.lineTo(i*step,y);
         }
-        canvas.stroke();
-      }
-      draw();
+        c.stroke();
+      })();
     }
 
-    const analyserA = ctx.createAnalyser();
-    gainA.connect(analyserA);
-    plot("liveA", buf => analyserA.getFloatTimeDomainData(buf), "#ff4444");
+    const analyserA=ctx.createAnalyser(), analyserB=ctx.createAnalyser(), analyserF=ctx.createAnalyser();
+    gainA.connect(analyserA); gainB.connect(analyserB); filter.connect(analyserF);
+    plot("liveA", buf=>analyserA.getFloatTimeDomainData(buf), "#ff4444");
+    plot("liveB", buf=>analyserB.getFloatTimeDomainData(buf), "#33ff33");
+    plot("liveF", buf=>analyserF.getFloatTimeDomainData(buf), "#3399ff");
 
-    const analyserB = ctx.createAnalyser();
-    gainB.connect(analyserB);
-    plot("liveB", buf => analyserB.getFloatTimeDomainData(buf), "#33ff33");
-
-    const analyserF = ctx.createAnalyser();
-    filter.connect(analyserF);
-    plot("liveF", buf => analyserF.getFloatTimeDomainData(buf), "#3399ff");
-
-    const sCtxA = el("staticA").getContext("2d");
-    sCtxA.fillStyle = "#111"; sCtxA.fillRect(0, 0, 400, 150);
-    sCtxA.strokeStyle = "#ff4444"; sCtxA.beginPath();
-    for (let i = 0; i < 400; i++) {
-      const y = (1 - Math.sin(2 * Math.PI * i / 400)) * 75;
-      i === 0 ? sCtxA.moveTo(i, y) : sCtxA.lineTo(i, y);
+    // --- Static Canvases ---
+    const sA=el("staticA").getContext("2d");
+    sA.fillStyle="#111"; sA.fillRect(0,0,400,150);
+    sA.strokeStyle="#ff4444"; sA.beginPath();
+    for(let i=0;i<400;i++){
+      const y=(1-Math.sin(2*Math.PI*i/400))*75;
+      i===0?sA.moveTo(i,y):sA.lineTo(i,y);
     }
-    sCtxA.stroke();
+    sA.stroke();
 
-    const sCtxB = el("staticB").getContext("2d");
-    sCtxB.fillStyle = "#111"; sCtxB.fillRect(0, 0, 400, 150);
-    sCtxB.strokeStyle = "#33ff33"; sCtxB.beginPath();
-    for (let i = 0; i < tableLen; i++) {
-      const y = (1 - data[i]) * 75;
-      i === 0 ? sCtxB.moveTo(i, y) : sCtxB.lineTo(i, y);
+    const sB=el("staticB").getContext("2d");
+    sB.fillStyle="#111"; sB.fillRect(0,0,400,150);
+    sB.strokeStyle="#33ff33"; sB.beginPath();
+    for(let i=0;i<tableLen;i++){
+      const y=(1-data[i])*75;
+      i===0?sB.moveTo(i,y):sB.lineTo(i,y);
     }
-    sCtxB.stroke();
+    sB.stroke();
 
-    document.body.addEventListener("click", () => {
-      if (ctx.state !== "running") ctx.resume();
-    }, { once: true });
+    // --- Auto-resume on touch ---
+    document.body.addEventListener("click", ()=>{ if(ctx.state!=="running") ctx.resume(); }, {once:true});
   </script>
 </body>
 </html>
