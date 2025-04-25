@@ -84,7 +84,7 @@
     </style>
   </head>
 
-  <body class="text-white font-mono min-h-screen flex flex-col items-center justify-start p-6 overflow-hidden">
+  <body class="text-white font-mono min-h-screen flex flex-col items-center justify-start p-6">
     <!-- Header and title section -->
     <div class="w-full max-w-6xl text-center space-y-4">
       <h1 class="font-bold glow pulse fit-text">∴ Quantum Thought Engine ∴</h1>
@@ -93,36 +93,34 @@
       </div>
     </div>
 
-    <!-- Sticky output box -->
+    <!-- Output box stays in visual flow but high in layout -->
     <div
       id="output"
-      class="text-lg md:text-xl mt-6 mb-4 px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white w-full max-w-4xl z-10"
-      style="position: sticky; top: 110px;"
+      class="text-lg md:text-xl mt-6 mb-6 px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white w-full max-w-4xl"
     >
       ∴ awaits your signal...
     </div>
 
-    <!-- Scrollable button container -->
+    <!-- Scrollable button area WITHIN its own scroll section -->
     <div
-      class="overflow-y-auto w-full max-w-6xl flex-1 mt-2 pb-20"
-      style="max-height: calc(100vh - 260px);"
+      class="w-full max-w-6xl overflow-y-auto"
+      style="max-height: 60vh;"
     >
       <div
         id="buttons"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2 pb-12"
       >
         <!-- Buttons injected via script -->
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer stays at page bottom -->
     <footer class="mt-12 text-xs text-gray-500 whitespace-pre-line text-center">
       ∴ — the N-dimensional mirror of cognition and collapse Cory James Zuber
       sudo genesis protocol
       <span class="green-dot"></span>
     </footer>
 
-    <!-- Script for buttons -->
     <script>
       const thoughts = [
         ["Perception Collapse", "∴ Observation selects one version of infinite potential. To see is to reduce."],
