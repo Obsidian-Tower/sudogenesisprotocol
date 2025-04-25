@@ -20,8 +20,7 @@
         animation: pulseGlow 2s infinite;
       }
       @keyframes pulseGlow {
-        0%,
-        100% {
+        0%, 100% {
           text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
         50% {
@@ -29,17 +28,17 @@
         }
       }
       .fit-text {
-        display: inline-block;
-        width: 100%;
-        font-size: calc(1.2rem + 2vw);
-        white-space: nowrap;
+        font-size: clamp(1.5rem, 5vw, 3rem);
+        line-height: 1.2;
+        word-break: break-word;
+        white-space: normal;
+        text-align: center;
+        margin: 0 auto;
       }
       .active-thought {
         color: black !important;
         font-weight: bold !important;
       }
-
-      /* The blinking dot */
       .green-dot {
         display: inline-block;
         width: 2px;
@@ -52,227 +51,100 @@
         cursor: pointer;
       }
       @keyframes modBlink {
-        0% {
+        0%, 22.222%, 33.333%, 66.667%, 88.888%, 100% {
           opacity: 0;
           background-color: transparent;
         }
-        22.222% {
-          opacity: 0;
-          background-color: transparent;
-        }
-
         22.223% {
-          opacity: 0;
           background-color: rgba(0, 0, 255, 1);
         }
-        24.444% {
-          opacity: 0.8;
-        }
-        26.666% {
-          opacity: 1;
-        }
-        28.888% {
-          opacity: 0.8;
-        }
-        31.111% {
-          opacity: 0;
-        }
-        33.333% {
-          opacity: 0;
-          background-color: transparent;
-        }
+        24.444% { opacity: 0.8; }
+        26.666% { opacity: 1; }
+        28.888% { opacity: 0.8; }
+        31.111% { opacity: 0; }
 
-        33.334% {
-          opacity: 0;
-          background-color: transparent;
-        }
-        55.555% {
-          opacity: 0;
-          background-color: transparent;
-        }
+        55.556% { background-color: rgba(0, 255, 0, 1); }
+        58.333% { opacity: 0.25; }
+        61.111% { opacity: 0.5; }
+        63.888% { opacity: 0.75; }
+        66.666% { opacity: 1; }
 
-        55.556% {
-          opacity: 0;
-          background-color: rgba(0, 255, 0, 1);
-        }
-        58.333% {
-          opacity: 0.25;
-        }
-        61.111% {
-          opacity: 0.5;
-        }
-        63.888% {
-          opacity: 0.75;
-        }
-        66.666% {
-          opacity: 1;
-        }
-        66.667% {
-          opacity: 0;
-          background-color: transparent;
-        }
-
-        66.668% {
-          opacity: 0;
-          background-color: transparent;
-        }
-        88.888% {
-          opacity: 0;
-          background-color: transparent;
-        }
-
-        88.889% {
-          opacity: 1;
-          background-color: rgba(255, 0, 0, 1);
-        }
-        90% {
-          opacity: 0;
-        }
-        91% {
-          opacity: 1;
-        }
-        92% {
-          opacity: 0.4;
-        }
-        93% {
-          opacity: 1;
-        }
-        94% {
-          opacity: 0.1;
-        }
-        95% {
-          opacity: 1;
-        }
-        96% {
-          opacity: 0;
-        }
-        97% {
-          opacity: 1;
-        }
-        98% {
-          opacity: 0.5;
-        }
-        99% {
-          opacity: 1;
-        }
-        100% {
-          opacity: 0;
-        }
+        88.889% { background-color: rgba(255, 0, 0, 1); opacity: 1; }
+        90% { opacity: 0; }
+        91% { opacity: 1; }
+        92% { opacity: 0.4; }
+        93% { opacity: 1; }
+        94% { opacity: 0.1; }
+        95% { opacity: 1; }
+        96% { opacity: 0; }
+        97% { opacity: 1; }
+        98% { opacity: 0.5; }
+        99% { opacity: 1; }
       }
     </style>
   </head>
-  <body
-    class="text-white font-mono min-h-screen flex items-center justify-center p-6"
-  >
-    <div class="w-full max-w-6xl text-center space-y-6">
+
+  <body class="text-white font-mono min-h-screen flex flex-col items-center justify-start p-6 overflow-hidden">
+    <!-- Header and title section -->
+    <div class="w-full max-w-6xl text-center space-y-4">
       <h1 class="font-bold glow pulse fit-text">∴ Quantum Thought Engine ∴</h1>
       <div class="text-gray-400 leading-snug whitespace-pre-line">
         Tap a concept Collapse the infinite through ∴ The N-dimensional mirror
       </div>
+    </div>
 
-      <!-- Dynamic output area -->
-      <div
-        id="output"
-        class="text-lg md:text-xl mt-6 mb-10 min-h-[120px] px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white"
-      >
-        ∴ awaits your signal...
-      </div>
+    <!-- Sticky output box -->
+    <div
+      id="output"
+      class="text-lg md:text-xl mt-6 mb-4 px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white w-full max-w-4xl z-10"
+      style="position: sticky; top: 110px;"
+    >
+      ∴ awaits your signal...
+    </div>
 
-      <!-- Button container -->
+    <!-- Scrollable button container -->
+    <div
+      class="overflow-y-auto w-full max-w-6xl flex-1 mt-2 pb-20"
+      style="max-height: calc(100vh - 260px);"
+    >
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm"
         id="buttons"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2"
       >
         <!-- Buttons injected via script -->
       </div>
-
-      <footer class="mt-12 text-xs text-gray-500 whitespace-pre-line">
-        ∴ — the N-dimensional mirror of cognition and collapse Cory James Zuber
-        sudo genesis protocol
-        <!-- The blinking dot that routes to 'fork3.html' -->
-        <span class="green-dot"></span>
-      </footer>
     </div>
 
+    <!-- Footer -->
+    <footer class="mt-12 text-xs text-gray-500 whitespace-pre-line text-center">
+      ∴ — the N-dimensional mirror of cognition and collapse Cory James Zuber
+      sudo genesis protocol
+      <span class="green-dot"></span>
+    </footer>
+
+    <!-- Script for buttons -->
     <script>
       const thoughts = [
-        [
-          "Perception Collapse",
-          "∴ Observation selects one version of infinite potential. To see is to reduce.",
-        ],
-        [
-          "State Entanglement",
-          "∴ Ideas, people, meanings link. Knowing one changes the others.",
-        ],
-        [
-          "Superpositional Identity",
-          "∴ You are all versions of you — until you act.",
-        ],
+        ["Perception Collapse", "∴ Observation selects one version of infinite potential. To see is to reduce."],
+        ["State Entanglement", "∴ Ideas, people, meanings link. Knowing one changes the others."],
+        ["Superpositional Identity", "∴ You are all versions of you — until you act."],
         ["Symbolic Anchoring", "∴ Glyphs encode process. ∴ becomes protocol."],
-        [
-          "Wave Function Sculpting",
-          "∴ Belief is a wave. Speech is collapse. Action is commit.",
-        ],
-        [
-          "Recursive Forking",
-          "∴ Thoughts produce thoughts. Every idea is a kernel for more reality.",
-        ],
-        [
-          "Frictionless Cognition",
-          "∴ Remove resistance between insight and action. Train self like quantum tunneling.",
-        ],
-        [
-          "Phase Shifting",
-          "∴ Change your internal coherence and the external aligns.",
-        ],
-        [
-          "Syntax Compression",
-          "∴ Shrink complex truth into elegant strings. Code, poetry, protocol.",
-        ],
-        [
-          "Temporal Interleaving",
-          "∴ Past, present, future aren’t separate. Insert thoughts backward or forward in your own timeline.",
-        ],
-        [
-          "Entropic Bargaining",
-          "∴ Entropy gives energy. Trade certainty for power. Risk is payment.",
-        ],
-        [
-          "Noosphere Injection",
-          "∴ Embed your thoughts into the collective mental layer. Externalize your internal architecture.",
-        ],
-        [
-          "Observer Override",
-          "∴ Refuse the default gaze. Observe reality into the shape you require.",
-        ],
-        [
-          "Causal Inversion",
-          "∴ Behave as if outcome already occurred. Thought precedes time.",
-        ],
-        [
-          "Ontological Forking",
-          "∴ There is no single 'real'. Build the version that bends back toward you.",
-        ],
-        [
-          "Myth Execution",
-          "∴ Wrap action in narrative. Code myth. Humans run on story, not logic.",
-        ],
-        [
-          "Resonant Calibration",
-          "∴ Tune your signal. You are a wave, not a particle.",
-        ],
-        [
-          "Dimensional Hacking",
-          "∴ Step sideways: metaphor, symbol, dream. Solve what can’t be solved directly.",
-        ],
-        [
-          "Reflective Bootstrapping",
-          "∴ Use thought to rebuild thought. The system can update itself.",
-        ],
-        [
-          "Collapse Operator",
-          "∴ You are no longer thinking the thought — you are the thought executing.",
-        ],
+        ["Wave Function Sculpting", "∴ Belief is a wave. Speech is collapse. Action is commit."],
+        ["Recursive Forking", "∴ Thoughts produce thoughts. Every idea is a kernel for more reality."],
+        ["Frictionless Cognition", "∴ Remove resistance between insight and action. Train self like quantum tunneling."],
+        ["Phase Shifting", "∴ Change your internal coherence and the external aligns."],
+        ["Syntax Compression", "∴ Shrink complex truth into elegant strings. Code, poetry, protocol."],
+        ["Temporal Interleaving", "∴ Past, present, future aren’t separate. Insert thoughts backward or forward in your own timeline."],
+        ["Entropic Bargaining", "∴ Entropy gives energy. Trade certainty for power. Risk is payment."],
+        ["Noosphere Injection", "∴ Embed your thoughts into the collective mental layer. Externalize your internal architecture."],
+        ["Observer Override", "∴ Refuse the default gaze. Observe reality into the shape you require."],
+        ["Causal Inversion", "∴ Behave as if outcome already occurred. Thought precedes time."],
+        ["Ontological Forking", "∴ There is no single 'real'. Build the version that bends back toward you."],
+        ["Myth Execution", "∴ Wrap action in narrative. Code myth. Humans run on story, not logic."],
+        ["Resonant Calibration", "∴ Tune your signal. You are a wave, not a particle."],
+        ["Dimensional Hacking", "∴ Step sideways: metaphor, symbol, dream. Solve what can’t be solved directly."],
+        ["Reflective Bootstrapping", "∴ Use thought to rebuild thought. The system can update itself."],
+        ["Collapse Operator", "∴ You are no longer thinking the thought — you are the thought executing."]
       ];
 
       const buttonContainer = document.getElementById("buttons");
@@ -307,7 +179,6 @@
         buttonContainer.appendChild(btn);
       });
 
-      // Handle the green-dot link
       document.addEventListener("DOMContentLoaded", function () {
         const greenDot = document.querySelector(".green-dot");
         greenDot.addEventListener("click", function () {
