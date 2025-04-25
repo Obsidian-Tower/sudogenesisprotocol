@@ -90,12 +90,12 @@
       }
 
       #buttons-wrapper {
-        max-height: 60vh;
+        max-height: calc(60vh - 100px);
       }
 
       @media screen and (orientation: landscape) {
         #buttons-wrapper {
-          max-height: 75vh !important;
+          max-height: calc(75vh - 100px) !important;
         }
       }
     </style>
@@ -124,14 +124,13 @@
     <div id="buttons-wrapper" class="w-full max-w-6xl overflow-y-auto">
       <div
         id="buttons"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2 pb-4"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2"
       ></div>
     </div>
 
     <!-- Footer -->
-    <footer class="mt-4 text-xs text-gray-500 whitespace-pre-line text-center">
-      ∴ — the N-dimensional mirror of cognition and collapse
-      Cory James Zuber
+    <footer class="text-xs text-gray-500 whitespace-pre-line text-center">
+      ∴ — the N-dimensional mirror of cognition and collapse Cory James Zuber
       sudo genesis protocol
       <span class="green-dot"></span>
     </footer>
