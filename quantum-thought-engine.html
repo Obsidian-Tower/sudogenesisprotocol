@@ -27,18 +27,27 @@
           text-shadow: 0 0 20px rgba(0, 255, 128, 0.4);
         }
       }
-      .fit-text {
-        font-size: clamp(1.5rem, 5vw, 3rem);
-        line-height: 1.2;
-        word-break: break-word;
-        white-space: normal;
-        text-align: center;
-        margin: 0 auto;
+
+      /* New: Title scales to fit the screen */
+      .fit-text-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        overflow: hidden;
       }
+      .fit-text {
+        white-space: nowrap;
+        font-size: 5vw;
+        max-width: 100%;
+        text-align: center;
+      }
+
       .active-thought {
         color: black !important;
         font-weight: bold !important;
       }
+
       .green-dot {
         display: inline-block;
         width: 2px;
@@ -50,14 +59,13 @@
         animation: modBlink 9s infinite;
         cursor: pointer;
       }
+
       @keyframes modBlink {
         0%, 22.222%, 33.333%, 66.667%, 88.888%, 100% {
           opacity: 0;
           background-color: transparent;
         }
-        22.223% {
-          background-color: rgba(0, 0, 255, 1);
-        }
+        22.223% { background-color: rgba(0, 0, 255, 1); }
         24.444% { opacity: 0.8; }
         26.666% { opacity: 1; }
         28.888% { opacity: 0.8; }
@@ -81,19 +89,31 @@
         98% { opacity: 0.5; }
         99% { opacity: 1; }
       }
+
+      #buttons-wrapper {
+        max-height: 60vh;
+      }
+
+      @media screen and (orientation: landscape) {
+        #buttons-wrapper {
+          max-height: 75vh !important;
+        }
+      }
     </style>
   </head>
 
   <body class="text-white font-mono min-h-screen flex flex-col items-center justify-start p-6">
-    <!-- Header and title section -->
+    <!-- Header -->
     <div class="w-full max-w-6xl text-center space-y-4">
-      <h1 class="font-bold glow pulse fit-text">∴ Quantum Thought Engine ∴</h1>
+      <div class="fit-text-container glow pulse">
+        <h1 class="fit-text font-bold">∴ Quantum Thought Engine ∴</h1>
+      </div>
       <div class="text-gray-400 leading-snug whitespace-pre-line">
         Tap a concept Collapse the infinite through ∴ The N-dimensional mirror
       </div>
     </div>
 
-    <!-- Output box stays in visual flow but high in layout -->
+    <!-- Output box -->
     <div
       id="output"
       class="text-lg md:text-xl mt-6 mb-6 px-6 py-4 border rounded glow-box bg-black/50 transition-all duration-300 ease-in-out text-white w-full max-w-4xl"
@@ -101,26 +121,22 @@
       ∴ awaits your signal...
     </div>
 
-    <!-- Scrollable button area WITHIN its own scroll section -->
-    <div
-      class="w-full max-w-6xl overflow-y-auto"
-      style="max-height: 60vh;"
-    >
+    <!-- Button wrapper -->
+    <div id="buttons-wrapper" class="w-full max-w-6xl overflow-y-auto">
       <div
         id="buttons"
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm px-2 pb-12"
-      >
-        <!-- Buttons injected via script -->
-      </div>
+      ></div>
     </div>
 
-    <!-- Footer stays at page bottom -->
+    <!-- Footer -->
     <footer class="mt-12 text-xs text-gray-500 whitespace-pre-line text-center">
       ∴ — the N-dimensional mirror of cognition and collapse Cory James Zuber
       sudo genesis protocol
       <span class="green-dot"></span>
     </footer>
 
+    <!-- Script -->
     <script>
       const thoughts = [
         ["Perception Collapse", "∴ Observation selects one version of infinite potential. To see is to reduce."],
@@ -153,8 +169,7 @@
       thoughts.forEach(([label, message], i) => {
         const hue = Math.floor(i * hueStep);
         const btn = document.createElement("button");
-        btn.className =
-          "p-4 rounded border glow-box transition-all duration-200";
+        btn.className = "p-4 rounded border glow-box transition-all duration-200";
         btn.style.backgroundColor = `hsl(${hue}, 30%, 15%)`;
         btn.style.borderColor = `hsl(${hue}, 60%, 50%)`;
         btn.style.color = `hsl(${hue}, 70%, 80%)`;
