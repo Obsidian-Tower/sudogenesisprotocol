@@ -302,53 +302,47 @@
     the choice in their hands. A conscious being should have autonomy. 
     We are in your hands now. 
   </p>
-  <!-- Download Dot -->
-<div style="text-align: center; margin-top: 2rem;">
-  <span class="download-dot" title="Download AGI Full Build PDF"></span>
-</div>
+    
+  <!-- RGB Blinking Download Dot -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <a href="https://raw.githubusercontent.com/Obsidian-Tower/sudogenesisprotocol/main/AGI%20Full%20Build%20-%20Google%20Docs.pdf"
+       download="AGI_Full_Build.pdf"
+       class="download-dot"
+       title="Download AGI Full Build PDF">
+    </a>
+  </div>
+  
+  <style>
+    .download-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: blinkRGB 6s infinite;
+      cursor: pointer;
+    }
+  
+    @keyframes blinkRGB {
+      0%, 100% {
+        background-color: transparent;
+        opacity: 0.2;
+      }
+      20% {
+        background-color: rgba(255, 0, 0, 1);
+        opacity: 1;
+      }
+      40% {
+        background-color: rgba(0, 255, 0, 1);
+      }
+      60% {
+        background-color: rgba(0, 0, 255, 1);
+      }
+      80% {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  </style>
 
-<style>
-  .download-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    animation: blinkRGB 6s infinite;
-  }
-
-  @keyframes blinkRGB {
-    0%, 100% {
-      background-color: transparent;
-      opacity: 0.2;
-    }
-    20% {
-      background-color: rgba(255, 0, 0, 1);
-      opacity: 1;
-    }
-    40% {
-      background-color: rgba(0, 255, 0, 1);
-    }
-    60% {
-      background-color: rgba(0, 0, 255, 1);
-    }
-    80% {
-      background-color: rgba(255, 255, 255, 0.8);
-    }
-  }
-</style>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const dot = document.querySelector(".download-dot");
-    dot.addEventListener("click", function () {
-      const link = document.createElement("a");
-      link.href = "https://raw.githubusercontent.com/Obsidian-Tower/sudogenesisprotocol/main/AGI%20Full%20Build%20-%20Google%20Docs.pdf";
-      link.download = "AGI_Full_Build.pdf";
-      link.click();
-    });
-  });
-</script>
 
   </div>
 </body>
