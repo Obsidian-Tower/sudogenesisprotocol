@@ -8,7 +8,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      background-color:rgb(26, 25, 44);
+      background-color: rgb(26, 25, 44);
       height: 100vh;
       overflow: hidden;
       touch-action: manipulation;
@@ -56,12 +56,14 @@
       top: 20px; /* below pixel row */
       width: 300px;
       height: 250px;
-      z-index: 50;
+      z-index: 999;
+      pointer-events: auto;
     }
 
     #ad-script-container {
       width: 300px;
       height: 250px;
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -81,26 +83,15 @@
     <div id="ad-script-container"></div>
   </div>
 
-  <!-- Ad script injection -->
-  <script type="text/javascript">
-    atOptions = {
-      'key' : '6cc4c67e28ed0e6895b3c88421abe359',
-      'format' : 'iframe',
-      'height' : 250,
-      'width' : 300,
-      'params' : {}
-    };
-  </script>
-  <script type="text/javascript" src="//www.highperformanceformat.com/6cc4c67e28ed0e6895b3c88421abe359/invoke.js"></script>
-
+  <!-- JS logic -->
   <script>
+    // Game logic
     const greenBar = document.getElementById('green-bar');
     const blueBar = document.getElementById('blue-bar');
     const barWidth = 10;
     const blueSpeed = 2;
     const totalWidth = window.innerWidth;
     const maxBluePos = totalWidth - barWidth;
-
     let bluePos = 0;
     let blueDirection = 1;
 
@@ -160,11 +151,12 @@
     const adWrapper = document.getElementById('ad-wrapper');
     let adX = 0;
     let adDirection = 1;
-    const adSpeed = 0.5; // slower than pixel
+    const adSpeed = 0.5;
+    const adWidth = 300;
 
     function updateAdPosition() {
       adX += adDirection * adSpeed;
-      const maxAdX = window.innerWidth - 300;
+      const maxAdX = window.innerWidth - adWidth;
 
       if (adX <= 0) {
         adX = 0;
@@ -179,6 +171,14 @@
     }
 
     requestAnimationFrame(updateAdPosition);
+
+    // Inject ad script after DOM loads to avoid write() issues
+    window.addEventListener('DOMContentLoaded', () => {
+      const script = document.createElement('script');
+      script.src = "//www.highperformanceformat.com/6cc4c67e28ed0e6895b3c88421abe359/invoke.js";
+      script.async = true;
+      document.getElementById('ad-script-container').appendChild(script);
+    });
   </script>
 </body>
 </html>
