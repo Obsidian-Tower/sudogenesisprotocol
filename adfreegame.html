@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mobile Blue-Green Bar Interaction</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: white;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    #top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 1px;
+      width: 100vw;
+      background-color: black;
+    }
+
+    .green-bar, .blue-bar {
+      position: absolute;
+      top: 0;
+      height: 1px;
+      width: 10px;
+    }
+
+    .green-bar {
+      background-color: #00FF00;
+    }
+
+    .blue-bar {
+      background-color: #0000FF;
+    }
+
+    .touch-left, .touch-right {
+      position: fixed;
+      top: 0;
+      height: 100vh;
+      width: 50%;
+      z-index: 10;
+    }
+
+    .touch-left {
+      left: 0;
+    }
+
+    .touch-right {
+      right: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="top-bar">
+    <div class="green-bar" id="green-bar"></div>
+    <div class="blue-bar" id="blue-bar"></div>
+  </div>
+
+  <!-- Invisible touch zones -->
+  <div class="touch-left" id="touch-left"></div>
+  <div class="touch-right" id="touch-right"></div>
+
+  <script>
+    const greenBar = document.getElementById('green-bar');
+    const blueBar = document.getElementById('blue-bar');
+    const barWidth = 10;
+    const speed = 2;
+    const totalWidth = window.innerWidth;
+    const maxPos = totalWidth - barWidth;
+
+    let bluePos = 0;
+    let direction = 1; // 1 = right, -1 = left, 0 = stopped at edge
+
+    function randomGreenPosition() {
+      const maxSections = Math.floor(totalWidth / barWidth);
+      const index = Math.floor(Math.random() * maxSections);
+      greenBar.style.left = `${index * barWidth}px`;
+    }
+
+    randomGreenPosition();
+
+    function update() {
+      bluePos += direction * speed;
+
+      if (bluePos <= 0) {
+        bluePos = 0;
+        direction = 0;
+      } else if (bluePos >= maxPos) {
+        bluePos = maxPos;
+        direction = 0;
+      }
+
+      blueBar.style.left = `${bluePos}px`;
+
+      const greenPos = parseInt(greenBar.style.left);
+      if (
+        bluePos < greenPos + barWidth &&
+        bluePos + barWidth > greenPos
+      ) {
+        randomGreenPosition();
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        if (bluePos > 0) direction = -1;
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        if (bluePos < maxPos) direction = 1;
+      }
+    });
+
+    // Touch controls
+    document.getElementById('touch-left').addEventListener('click', () => {
+      if (bluePos > 0) direction = -1;
+    });
+
+    document.getElementById('touch-right').addEventListener('click', () => {
+      if (bluePos < maxPos) direction = 1;
+    });
+
+    requestAnimationFrame(update);
+  </script>
+</body>
+</html>
