@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mobile Blue-Green Bar Interaction</title>
+  <title>Pixel Game with Ads</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background-color: white;
+      background-color: rgb(26, 25, 44);
       height: 100vh;
       overflow: hidden;
       touch-action: manipulation;
@@ -21,6 +21,7 @@
       height: 1px;
       width: 100vw;
       background-color: black;
+      z-index: 100;
     }
 
     .green-bar, .blue-bar {
@@ -53,17 +54,33 @@
     .touch-right {
       right: 0;
     }
+
+    #ad-container {
+      position: fixed;
+      top: 1px;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      z-index: 1;
+      overflow: auto;
+    }
   </style>
 </head>
 <body>
+  <!-- 1-pixel top bar and game -->
   <div id="top-bar">
     <div class="green-bar" id="green-bar"></div>
     <div class="blue-bar" id="blue-bar"></div>
   </div>
 
-  <!-- Invisible touch zones -->
+  <!-- Touch zones for mobile direction control -->
   <div class="touch-left" id="touch-left"></div>
   <div class="touch-right" id="touch-right"></div>
+
+  <!-- Full-page ad container -->
+  <div id="ad-container">
+    <script type='text/javascript' src='//pl26999237.profitableratecpm.com/11/82/3b/11823b51c9513ea0e523206e07455895.js'></script>
+  </div>
 
   <script>
     const greenBar = document.getElementById('green-bar');
@@ -74,7 +91,7 @@
     const maxPos = totalWidth - barWidth;
 
     let bluePos = 0;
-    let direction = 1; // 1 = right, -1 = left, 0 = stopped at edge
+    let direction = 1;
 
     function randomGreenPosition() {
       const maxSections = Math.floor(totalWidth / barWidth);
@@ -108,7 +125,7 @@
       requestAnimationFrame(update);
     }
 
-    // Keyboard controls
+    // Keyboard support
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         if (bluePos > 0) direction = -1;
@@ -117,7 +134,7 @@
       }
     });
 
-    // Touch controls
+    // Mobile touch support
     document.getElementById('touch-left').addEventListener('click', () => {
       if (bluePos > 0) direction = -1;
     });
