@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pixel Game with Bouncing Ad</title>
+  <title>Pixel Game with Static Centered Ad</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
@@ -53,16 +53,12 @@
 
     #ad-wrapper {
       position: fixed;
-      top: 20px; /* below pixel row */
+      top: 10px; /* Below pixel row */
+      left: 50%;
+      transform: translateX(-50%);
       width: 300px;
       height: 250px;
       z-index: 999;
-      pointer-events: auto;
-    }
-
-    #ad-script-container {
-      width: 300px;
-      height: 250px;
       pointer-events: auto;
     }
   </style>
@@ -78,14 +74,21 @@
   <div class="touch-left" id="touch-left"></div>
   <div class="touch-right" id="touch-right"></div>
 
-  <!-- Bouncing Ad -->
+  <!-- Static Centered Ad -->
   <div id="ad-wrapper">
-    <div id="ad-script-container"></div>
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '6cc4c67e28ed0e6895b3c88421abe359',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/6cc4c67e28ed0e6895b3c88421abe359/invoke.js"></script>
   </div>
 
-  <!-- JS logic -->
   <script>
-    // Game logic
     const greenBar = document.getElementById('green-bar');
     const blueBar = document.getElementById('blue-bar');
     const barWidth = 10;
@@ -146,39 +149,6 @@
     });
 
     requestAnimationFrame(updateBlue);
-
-    // Bouncing ad logic
-    const adWrapper = document.getElementById('ad-wrapper');
-    let adX = 0;
-    let adDirection = 1;
-    const adSpeed = 0.5;
-    const adWidth = 300;
-
-    function updateAdPosition() {
-      adX += adDirection * adSpeed;
-      const maxAdX = window.innerWidth - adWidth;
-
-      if (adX <= 0) {
-        adX = 0;
-        adDirection = 1;
-      } else if (adX >= maxAdX) {
-        adX = maxAdX;
-        adDirection = -1;
-      }
-
-      adWrapper.style.left = `${adX}px`;
-      requestAnimationFrame(updateAdPosition);
-    }
-
-    requestAnimationFrame(updateAdPosition);
-
-    // Inject ad script after DOM loads to avoid write() issues
-    window.addEventListener('DOMContentLoaded', () => {
-      const script = document.createElement('script');
-      script.src = "//www.highperformanceformat.com/6cc4c67e28ed0e6895b3c88421abe359/invoke.js";
-      script.async = true;
-      document.getElementById('ad-script-container').appendChild(script);
-    });
   </script>
 </body>
 </html>
