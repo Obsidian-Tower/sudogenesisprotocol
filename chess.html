@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dark Mode Chess — Highlights + Undo + Switch Sides + Colored Toggles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --light:#d9d9d9;   /* light grey */
+      --dark:#6b6b6b;    /* dark grey */
+
+      /* Dark mode UI */
+      --bg:#0e0f12;
+      --surface:#16181d;
+      --muted:#8c97a8;
+      --text:#e7eaf0;
+      --btn:#1e222b;
+      --btnText:#e7eaf0;
+
+      /* Attack colors */
+      --attack-user:  rgba(0, 128, 255, 0.45);  /* Blue = You (bottom) */
+      --attack-enemy: rgba(220, 40, 40, 0.45);  /* Red  = Enemy (top)  */
+      --attack-both:  rgba(155, 70, 255, 0.50); /* Purple = both       */
+
+      /* Toggle colors */
+      --blue: #0080ff;
+      --red:  #dc2828;
+      --track-off: #2a2f3a;
+      --track-on:  #263041;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1000px 700px at 10% 0%, #10131a, transparent 55%),
+        radial-gradient(1000px 700px at 90% 100%, #0c0f15, transparent 55%),
+        var(--bg);
+      color:var(--text);
+      min-height:100svh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .app{ width:min(92vw, min(85vh, 640px)); }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .title{
+      font-weight:700;
+      letter-spacing:.2px;
+      color:var(--text);
+      opacity:.95;
+      font-size:clamp(16px, 2.5vw, 20px);
+    }
+
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    button{
+      border:1px solid #2a2f3a;
+      background:var(--btn);
+      color:var(--btnText);
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 18px rgba(0,0,0,.25);
+      cursor:pointer;
+      font-weight:600;
+      transition:transform .06s ease, box-shadow .15s ease, opacity .15s ease, background .15s ease;
+    }
+    button:hover{ transform:translateY(-1px); background:#232836; }
+    button:active{ transform:translateY(1px); }
+    button:disabled{ opacity:.48; cursor:not-allowed; }
+
+    /* Pretty toggles */
+    .toggle{
+      display:flex; align-items:center; gap:8px;
+      padding:6px 8px; border-radius:999px; background:var(--surface);
+      border:1px solid #2a2f3a;
+    }
+    .toggle span{
+      font-size:12px; color:var(--muted);
+      line-height:1;
+    }
+    .switch{
+      position:relative; width:52px; height:28px; border-radius:999px;
+      background:var(--track-off);
+      transition:background .2s ease, box-shadow .2s ease;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .switch .knob{
+      position:absolute; top:4px; left:4px;
+      width:20px; height:20px; border-radius:50%;
+      background:#9aa4b2; /* default off knob */
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+      box-shadow:0 1px 2px rgba(0,0,0,.4);
+    }
+    /* Blue toggle states */
+    .switch--blue[data-on="true"]{ background: color-mix(in srgb, var(--blue) 40%, var(--track-on)); }
+    .switch--blue[data-on="true"] .knob{
+      transform: translateX(24px);
+      background: var(--blue);
+    }
+    /* Red toggle states */
+    .switch--red[data-on="true"]{ background: color-mix(in srgb, var(--red) 40%, var(--track-on)); }
+    .switch--red[data-on="true"] .knob{
+      transform: translateX(24px);
+      background: var(--red);
+    }
+
+    /* Purple piece toggles */
+    .switch--piece[data-on="true"]{
+      background: #5b2b9b; /* or use your favorite purple */
+    }
+
+    .switch--piece[data-on="true"] .knob{
+      transform: translateX(24px);
+      background: #c084fc; /* lighter purple for the knob */
+    }
+
+    /* Container for board */
+    .board-wrap{
+      position:relative;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 6px 18px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      background:linear-gradient(180deg, #1b202a, #151922);
+      padding:10px;
+    }
+    .board{
+      width:100%;
+      aspect-ratio:1 / 1;
+      display:grid;
+      grid-template-columns:repeat(8, 1fr);
+      grid-template-rows:repeat(8, 1fr);
+      border-radius:10px;
+      overflow:hidden;
+      border:1px solid #2a3040;
+      position:relative;
+      user-select:none;
+      touch-action:none;
+      transition: transform .25s ease;
+    }
+    /* Rotate the entire board to switch perspective */
+    .board.view-black{ transform: rotate(180deg); }
+
+    .square{
+      position:relative;
+      width:100%; height:100%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+      z-index:0;
+    }
+    .square.light{ background:var(--light); }
+    .square.dark{  background:var(--dark);  }
+
+    .square.drop-target{
+      outline:2px dashed #fff;
+      outline-offset:-4px;
+    }
+
+    /* Highlights BELOW piece */
+    .square.att-user::before,
+    .square.att-enemy::before,
+    .square.att-both::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      z-index:1;
+    }
+    .square.att-user::before{  background: var(--attack-user); }
+    .square.att-enemy::before{ background: var(--attack-enemy); }
+    .square.att-both::before{  background: var(--attack-both); }
+
+    /* Pieces ABOVE highlights; COUNTER-ROTATE when board is rotated so they stay upright */
+    .piece{
+      width:90%;
+      height:90%;
+      object-fit:contain;
+      pointer-events:auto;
+      user-select:none;
+      touch-action:none;
+      position:relative;
+      z-index:2;
+      transform: rotate(0deg);
+      transition: transform .25s ease;
+    }
+    .board.view-black .piece{
+      transform: rotate(180deg); /* counter rotation to keep upright */
+    }
+
+    .drag-ghost{
+      position:fixed;
+      width:64px; height:64px;
+      pointer-events:none;
+      transform:translate(-50%, -50%) scale(1.05); /* stays upright */
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,.6));
+      z-index:9999;
+    }
+
+    .last-from::after,
+    .last-to::after{
+      content:"";
+      position:absolute; inset:0;
+      background:rgba(255, 231, 87, .25);
+      mix-blend-mode:multiply;
+      pointer-events:none;
+      z-index:0;
+    }
+    .last-to::after{ background:rgba(87, 255, 170, .2); }
+
+    .legend{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+    }
+    .legend .key{
+      display:flex; align-items:center; gap:6px;
+      background:var(--surface);
+      border:1px solid #2a2f3a;
+      padding:6px 8px;
+      border-radius:999px;
+    }
+    .swatch{
+      width:14px; height:14px; border-radius:4px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.3);
+    }
+    .sw-user{  background:var(--attack-user); }
+    .sw-enemy{ background:var(--attack-enemy); }
+    .sw-both{  background:var(--attack-both); }
+
+    /* Piece toggle row */
+    .piece-toggles{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .piece-toggle-label{
+      text-align:center;
+      opacity:.85;
+    }
+    .piece-toggle-row{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:8px;
+    }
+    .toggle--piece span{
+      text-transform:capitalize;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">Dark Mode Chess — Attack Highlights (Blue = You, Red = Enemy, Purple = Both)</div>
+      <div class="controls">
+        <button id="backBtn" title="Undo last move" disabled>◀ Back</button>
+        <button id="switchBtn" title="Flip which side you're playing">Switch Sides</button>
+
+        <!-- Blue toggle -->
+        <label class="toggle" for="blueToggle">
+          <span>Blue</span>
+          <div id="blueSwitch" class="switch switch--blue" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+
+        <!-- Red toggle -->
+        <label class="toggle" for="redToggle">
+          <span>Red</span>
+          <div id="redSwitch" class="switch switch--red" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+
+        <button id="resetBtn" title="Reset to standard setup">Reset</button>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <div id="board" class="board" aria-label="Chess board"></div>
+    </div>
+
+    <!-- Piece highlight sliders -->
+    <div class="piece-toggles">
+      <div class="piece-toggle-label">Piece highlight filters</div>
+      <div class="piece-toggle-row">
+        <label class="toggle toggle--piece">
+          <span>pawn</span>
+          <div id="pawnSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+        <label class="toggle toggle--piece">
+          <span>rook</span>
+          <div id="rookSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+        <label class="toggle toggle--piece">
+          <span>knight</span>
+          <div id="knightSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+        <label class="toggle toggle--piece">
+          <span>bishop</span>
+          <div id="bishopSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+        <label class="toggle toggle--piece">
+          <span>queen</span>
+          <div id="queenSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+        <label class="toggle toggle--piece">
+          <span>king</span>
+          <div id="kingSwitch" class="switch switch--piece" data-on="true">
+            <div class="knob"></div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="key"><span class="swatch sw-user"></span> You (bottom)</span>
+      <span class="key"><span class="swatch sw-enemy"></span> Enemy (top)</span>
+      <span class="key"><span class="swatch sw-both"></span> Both sides (when both toggles on)</span>
+    </div>
+  </div>
+
+  <script>
+    /*
+      Images expected at:
+        game-images-1/<color>/<type>.png
+      where color ∈ {white, black} and type ∈ {pawn, rook, knight, bishop, queen, king}.
+    */
+
+    const boardEl = document.getElementById('board');
+    const backBtn = document.getElementById('backBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const switchBtn = document.getElementById('switchBtn');
+
+    const blueSwitch = document.getElementById('blueSwitch');
+    const redSwitch  = document.getElementById('redSwitch');
+
+    // Piece type switches
+    const pawnSwitch   = document.getElementById('pawnSwitch');
+    const rookSwitch   = document.getElementById('rookSwitch');
+    const knightSwitch = document.getElementById('knightSwitch');
+    const bishopSwitch = document.getElementById('bishopSwitch');
+    const queenSwitch  = document.getElementById('queenSwitch');
+    const kingSwitch   = document.getElementById('kingSwitch');
+
+    // Perspective: 'white' => white at bottom; 'black' => black at bottom.
+    let playingAs = 'white';
+
+    // Toggle state (blue = you, red = enemy)
+    let showUser = true;
+    let showEnemy = true;
+
+    // Piece type highlight enable state
+    const pieceToggleState = {
+      pawn:   true,
+      rook:   true,
+      knight: true,
+      bishop: true,
+      queen:  true,
+      king:   true,
+    };
+
+    // 8x8 board state: null or {color:'white'|'black', type:'pawn'|'rook'|'knight'|'bishop'|'queen'|'king'}
+    let boardState = createEmptyBoard();
+    let lastMoveSquares = { from:null, to:null };
+    const moveStack = []; // for undo
+
+    // Attack map bitmask: 0 = none, 1 = white, 2 = black, 3 = both
+    let attackMap = createZeroMap();
+
+    const imgPath = (color, type) => `game-images-1/${color}/${type}.png`;
+
+    function createEmptyBoard(){ return Array.from({length:8}, () => Array(8).fill(null)); }
+    function createZeroMap(){ return Array.from({length:8}, () => Array(8).fill(0)); }
+    function inBounds(r,c){ return r>=0 && r<8 && c>=0 && c<8; }
+
+    function placeStandardSetup(){
+      boardState = createEmptyBoard();
+      for(let c=0; c<8; c++){
+        boardState[6][c] = {color:'white', type:'pawn'};
+        boardState[1][c] = {color:'black', type:'pawn'};
+      }
+      const back = ['rook','knight','bishop','queen','king','bishop','knight','rook'];
+      for(let c=0; c<8; c++){
+        boardState[7][c] = {color:'white', type:back[c]};
+        boardState[0][c] = {color:'black', type:back[c]};
+      }
+    }
+
+    function addAttack(r,c,color){
+      if(!inBounds(r,c)) return;
+      const bit = (color === 'white') ? 1 : 2;
+      attackMap[r][c] = attackMap[r][c] | bit;
+    }
+
+    /* ---------- Piece attack computations ---------- */
+
+    function computePawnAttacks(){
+      if(!pieceToggleState.pawn) return;
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='pawn') continue;
+          if(p.color==='white'){
+            addAttack(r-1,c-1,'white');
+            addAttack(r-1,c+1,'white');
+          } else {
+            addAttack(r+1,c-1,'black');
+            addAttack(r+1,c+1,'black');
+          }
+        }
+      }
+    }
+
+    function rayScanFrom(r, c, color, directions){
+      for(const [dr,dc] of directions){
+        let rr = r + dr, cc = c + dc;
+        while(inBounds(rr,cc)){
+          const occ = boardState[rr][cc];
+          addAttack(rr,cc,color); // square is attacked (even if occupied)
+          if(occ){ break; }       // stop on first blocker
+          rr += dr; cc += dc;
+        }
+      }
+    }
+
+    function computeRookAttacks(){
+      if(!pieceToggleState.rook) return;
+      const rookDirs = [[-1,0],[1,0],[0,-1],[0,1]];
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='rook') continue;
+          rayScanFrom(r, c, p.color, rookDirs);
+        }
+      }
+    }
+
+    function computeBishopAttacks(){
+      if(!pieceToggleState.bishop) return;
+      const bishopDirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='bishop') continue;
+          rayScanFrom(r, c, p.color, bishopDirs);
+        }
+      }
+    }
+
+    function computeQueenAttacks(){
+      if(!pieceToggleState.queen) return;
+      const dirs = [
+        [-1, 0],[ 1, 0],[ 0,-1],[ 0, 1],
+        [-1,-1],[-1, 1],[ 1,-1],[ 1, 1]
+      ];
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='queen') continue;
+          rayScanFrom(r, c, p.color, dirs);
+        }
+      }
+    }
+
+    function computeKnightAttacks(){
+      if(!pieceToggleState.knight) return;
+      const jumps = [
+        [-2,-1],[-2, 1],[-1,-2],[-1, 2],
+        [ 1,-2],[ 1, 2],[ 2,-1],[ 2, 1],
+      ];
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='knight') continue;
+          for(const [dr,dc] of jumps){
+            const rr = r + dr, cc = c + dc;
+            if(inBounds(rr,cc)) addAttack(rr,cc,p.color);
+          }
+        }
+      }
+    }
+
+    function computeKingAttacks(){
+      if(!pieceToggleState.king) return;
+      const around = [
+        [-1,-1],[-1, 0],[-1, 1],
+        [ 0,-1],         [ 0, 1],
+        [ 1,-1],[ 1, 0],[ 1, 1],
+      ];
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const p = boardState[r][c];
+          if(!p || p.type!=='king') continue;
+          for(const [dr,dc] of around){
+            const rr = r + dr, cc = c + dc;
+            if(inBounds(rr,cc)) addAttack(rr,cc,p.color);
+          }
+        }
+      }
+    }
+
+    function computeAttackMap(){
+      attackMap = createZeroMap();
+      computePawnAttacks();
+      computeRookAttacks();
+      computeBishopAttacks();
+      computeQueenAttacks();
+      computeKnightAttacks();
+      computeKingAttacks();
+    }
+
+    /* ---------- Rendering / UI ---------- */
+
+    function renderBoard(){
+      computeAttackMap();
+
+      // Rotate container only; pieces counter-rotate via CSS to stay upright
+      boardEl.classList.toggle('view-black', playingAs === 'black');
+
+      boardEl.innerHTML = '';
+
+      for(let r=0; r<8; r++){
+        for(let c=0; c<8; c++){
+          const sq = document.createElement('div');
+          sq.className = 'square ' + (((r+c)%2===0) ? 'light':'dark');
+          sq.dataset.r = r;
+          sq.dataset.c = c;
+
+          // Map white/black attacks -> user/enemy based on perspective AND toggles
+          const mask = attackMap[r][c]; // 1=white, 2=black, 3=both
+          const userIsWhite = (playingAs === 'white');
+
+          const paintUser = () => { if(showUser) sq.classList.add('att-user'); };
+          const paintEnemy = () => { if(showEnemy) sq.classList.add('att-enemy'); };
+
+          if(mask === 3){
+            if(showUser && showEnemy){
+              sq.classList.add('att-both');
+            } else if(showUser && !showEnemy){
+              paintUser();
+            } else if(!showUser && showEnemy){
+              paintEnemy();
+            }
+          } else if(mask === 1){ // white attacks
+            userIsWhite ? paintUser() : paintEnemy();
+          } else if(mask === 2){ // black attacks
+            userIsWhite ? paintEnemy() : paintUser();
+          }
+
+          // Last move highlights
+          if(lastMoveSquares.from && lastMoveSquares.from.r===r && lastMoveSquares.from.c===c){
+            sq.classList.add('last-from');
+          }
+          if(lastMoveSquares.to && lastMoveSquares.to.r===r && lastMoveSquares.to.c===c){
+            sq.classList.add('last-to');
+          }
+
+          const piece = boardState[r][c];
+          if(piece){
+            const img = document.createElement('img');
+            img.className = 'piece';
+            img.alt = `${piece.color} ${piece.type}`;
+            img.draggable = false;
+            img.src = imgPath(piece.color, piece.type);
+            img.dataset.color = piece.color;
+            img.dataset.type = piece.type;
+            img.dataset.r = r;
+            img.dataset.c = c;
+            attachPieceDrag(img);
+            sq.appendChild(img);
+          }
+
+          boardEl.appendChild(sq);
+        }
+      }
+
+      // Update toggle visuals
+      blueSwitch.setAttribute('data-on', String(showUser));
+      redSwitch .setAttribute('data-on', String(showEnemy));
+      pawnSwitch  .setAttribute('data-on', String(pieceToggleState.pawn));
+      rookSwitch  .setAttribute('data-on', String(pieceToggleState.rook));
+      knightSwitch.setAttribute('data-on', String(pieceToggleState.knight));
+      bishopSwitch.setAttribute('data-on', String(pieceToggleState.bishop));
+      queenSwitch .setAttribute('data-on', String(pieceToggleState.queen));
+      kingSwitch  .setAttribute('data-on', String(pieceToggleState.king));
+    }
+
+    function clearHighlights(){ lastMoveSquares = {from:null, to:null}; }
+
+    function attachPieceDrag(imgEl){
+      let dragging = false;
+      let ghost = null;
+      let from = { r: Number(imgEl.dataset.r), c: Number(imgEl.dataset.c) };
+      let currentOverSquare = null;
+
+      const onPointerDown = (e) => {
+        e.preventDefault();
+        dragging = true;
+        imgEl.setPointerCapture(e.pointerId);
+
+        ghost = document.createElement('img');
+        ghost.className = 'drag-ghost';
+        ghost.src = imgEl.src;
+        document.body.appendChild(ghost);
+        moveGhost(e.clientX, e.clientY); // stays upright
+
+        squareAt(from.r, from.c).classList.add('drop-target');
+      };
+
+      const onPointerMove = (e) => {
+        if(!dragging) return;
+        moveGhost(e.clientX, e.clientY);
+        const sq = squareUnderPoint(e.clientX, e.clientY);
+        if(currentOverSquare && currentOverSquare !== sq) currentOverSquare.classList.remove('drop-target');
+        currentOverSquare = sq;
+        if(sq) sq.classList.add('drop-target');
+      };
+
+      const onPointerUp = (e) => {
+        if(!dragging) return;
+        dragging = false;
+        imgEl.releasePointerCapture(e.pointerId);
+
+        const targetSq = squareUnderPoint(e.clientX, e.clientY);
+        cleanupGhostAndTargets();
+        if(!targetSq) return;
+
+        const to = { r: Number(targetSq.dataset.r), c: Number(targetSq.dataset.c) };
+        const moved = boardState[from.r][from.c];
+        if(!moved){ renderBoard(); return; }
+        const captured = boardState[to.r][to.c] ? {...boardState[to.r][to.c]} : null;
+
+        moveStack.push({ from:{...from}, to:{...to}, moved:{...moved}, captured: captured?{...captured}:null });
+        backBtn.disabled = moveStack.length===0;
+
+        boardState[from.r][from.c] = null;
+        boardState[to.r][to.c] = moved;
+
+        lastMoveSquares = { from:{...from}, to:{...to} };
+        renderBoard();
+      };
+
+      function cleanupGhostAndTargets(){
+        if(ghost){ ghost.remove(); ghost = null; }
+        document.querySelectorAll('.square.drop-target').forEach(el=>el.classList.remove('drop-target'));
+      }
+      function moveGhost(x, y){ if(ghost){ ghost.style.left = x + 'px'; ghost.style.top = y + 'px'; } }
+
+      imgEl.addEventListener('pointerdown', onPointerDown);
+      imgEl.addEventListener('pointermove', onPointerMove);
+      imgEl.addEventListener('pointerup', onPointerUp);
+      imgEl.addEventListener('pointercancel', onPointerUp);
+      imgEl.addEventListener('lostpointercapture', onPointerUp);
+    }
+
+    function squareUnderPoint(x, y){
+      const el = document.elementFromPoint(x, y);
+      if(!el) return null;
+      if(el.classList.contains('square')) return el;
+      if(el.classList.contains('piece')) return el.parentElement?.classList.contains('square') ? el.parentElement : null;
+      return el.closest?.('.square') ?? null;
+    }
+    function squareAt(r, c){ return boardEl.querySelector(`.square[data-r="${r}"][data-c="${c}"]`); }
+
+    function undo(){
+      if(moveStack.length===0) return;
+      const last = moveStack.pop();
+      lastMoveSquares = { from:{...last.to}, to:{...last.from} };
+      boardState[last.from.r][last.from.c] = {...last.moved};
+      boardState[last.to.r][last.to.c] = last.captured ? {...last.captured} : null;
+      backBtn.disabled = moveStack.length===0;
+      renderBoard();
+    }
+
+    function reset(){
+      moveStack.length = 0;
+      backBtn.disabled = true;
+      clearHighlights();
+      placeStandardSetup();
+      renderBoard();
+    }
+
+    function switchSides(){
+      playingAs = (playingAs === 'white') ? 'black' : 'white';
+      renderBoard();
+    }
+
+    // Toggle handlers (click the tracks to toggle)
+    blueSwitch.addEventListener('click', () => { showUser = !showUser; renderBoard(); });
+    redSwitch .addEventListener('click', () => { showEnemy = !showEnemy; renderBoard(); });
+
+    // Piece toggle handlers
+    pawnSwitch.addEventListener('click', () => {
+      pieceToggleState.pawn = !pieceToggleState.pawn;
+      renderBoard();
+    });
+    rookSwitch.addEventListener('click', () => {
+      pieceToggleState.rook = !pieceToggleState.rook;
+      renderBoard();
+    });
+    knightSwitch.addEventListener('click', () => {
+      pieceToggleState.knight = !pieceToggleState.knight;
+      renderBoard();
+    });
+    bishopSwitch.addEventListener('click', () => {
+      pieceToggleState.bishop = !pieceToggleState.bishop;
+      renderBoard();
+    });
+    queenSwitch.addEventListener('click', () => {
+      pieceToggleState.queen = !pieceToggleState.queen;
+      renderBoard();
+    });
+    kingSwitch.addEventListener('click', () => {
+      pieceToggleState.king = !pieceToggleState.king;
+      renderBoard();
+    });
+
+    // Controls
+    backBtn.addEventListener('click', undo);
+    resetBtn.addEventListener('click', reset);
+    switchBtn.addEventListener('click', switchSides);
+
+    // Initialize
+    placeStandardSetup();
+    renderBoard();
+
+    // Keyboard undo
+    window.addEventListener('keydown', (e)=>{
+      const z = e.key.toLowerCase()==='z';
+      if(z && (e.ctrlKey || e.metaKey)){
+        e.preventDefault();
+        undo();
+      }
+    });
+  </script>
+</body>
+</html>
