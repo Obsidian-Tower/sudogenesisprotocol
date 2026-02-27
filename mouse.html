@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mouse Tracker</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    #hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1.35;
+      z-index: 999999;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #hint {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.85);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">Move your mouse…</div>
+  <div id="hint">Tracking mouse position (viewport + page). Scroll and move.</div>
+
+  <script>
+    const hud = document.getElementById('hud');
+
+    function update(e) {
+      // clientX/Y = viewport coords
+      // pageX/Y = document coords (includes scroll)
+      hud.textContent =
+        `client: ${e.clientX}, ${e.clientY}  |  page: ${e.pageX}, ${e.pageY}`;
+    }
+
+    window.addEventListener('mousemove', update, { passive: true });
+    window.addEventListener('pointermove', update, { passive: true }); // covers pen/touch too
+  </script>
+</body>
+</html>
